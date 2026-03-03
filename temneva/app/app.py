@@ -15,7 +15,7 @@ def create_image():
     if not data or 'url' not in data:
         return jsonify({'error': 'url is required'}), 400
     
-    # Создание
+    # Создание записи
     image = {
         'id': next_id,
         'url': data['url'],
