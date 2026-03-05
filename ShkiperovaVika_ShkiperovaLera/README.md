@@ -25,3 +25,20 @@ API позволяет:
 В корне папки с проектом:
 
 `docker compose up --build`
+
+### Примеры запросов
+
+Посмотреть задачи:
+`curl http://localhost:5000/tasks`
+
+Добавление задачи:
+`curl -X POST http://localhost:5000/tasks -H "Content-Type: application/json" -d "{\"title\":\"Take red pill\",\"due\":\"1998-02-19\",\"priority\":1}"`
+
+Посмотреть задачи со статусом open:
+`curl "http://localhost:5000/tasks?status=open"`
+
+Изменить статус задачи:
+`curl -X PATCH http://localhost:5000/tasks/3 -H "Content-Type: application/json" -d "{\"status\":\"done\"}"`
+
+Удалить задачу:
+`curl -X DELETE http://localhost:5000/tasks/2`
