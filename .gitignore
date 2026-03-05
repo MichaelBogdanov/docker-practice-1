@@ -1,0 +1,13 @@
+# Временные файлы python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Системные файлы MacOS
+.DS_Store
+
+# Системные файлы Visual Studio
+.vscode/
+
+# Файлы базы данных
+*.db

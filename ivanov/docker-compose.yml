@@ -1,0 +1,21 @@
+# docker-compose.yml
+services:
+  weather-app:
+    build: app
+    container_name: weather-reports-app
+    ports:
+      - "5000:5000"
+    volumes:
+      # Монтируем volume для сохранения базы данных между перезапусками
+      - weather-data:/app
+    restart: unless-stopped
+    networks:
+      - weather-network
+
+volumes:
+  weather-data:
+    driver: local
+
+networks:
+  weather-network:
+    driver: bridge
