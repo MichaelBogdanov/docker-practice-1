@@ -142,7 +142,47 @@ def get_reports():
         
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-    
+
+# Просмотр последних отчётов
+@app.route('/reports/recent', methods=['GET'])
+def get_recent_reports():
+    try:
+        # Получаем параметр N из запроса (по умолчанию 10)
+        n = request.args.get('n', default=10, type=int)
+        
+        # Ограничиваем максимальное количество записей
+        if n > 100:
+            return jsonify({'error': 'Maximum number of records is 100'}), 400
+        
+        db = get_db()
+        cursor = db.cursor()
+        
+        # SQL запрос для получения последних N записей
+        cursor.execute('''
+            SELECT id, city, text, temp, timestamp
+            FROM reports
+            ORDER BY timestamp DESC
+            LIMIT ?
+        ''', (n,))
+        
+        reports = cursor.fetchall()
+        
+        # Преобразование результатов в список словарей
+        result = []
+        for report in reports:
+            result.append({
+                'id': report['id'],
+                'city': report['city'],
+                'text': report['text'],
+                'temp': report['temp'],
+                'timestamp': report['timestamp']
+            })
+        
+        return jsonify(result), 200
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 
 # Запускаем приложение
 if __name__ == '__main__':
