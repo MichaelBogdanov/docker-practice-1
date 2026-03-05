@@ -97,6 +97,52 @@ def create_report():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+# Просмотр всех отчётов
+@app.route('/reports', methods=['GET'])
+def get_reports():
+    try:
+        city = request.args.get('city')
+        db = get_db()
+        cursor = db.cursor()
+        
+        # SQL запрос с возможной фильтрацией по городу
+        if city:
+            cursor.execute('''
+                SELECT id, city, text, temp, timestamp
+                FROM reports
+                WHERE city = ?
+                ORDER BY timestamp DESC
+            ''', (city,))
+        else:
+            cursor.execute('''
+                SELECT id, city, text, temp, timestamp
+                FROM reports
+                ORDER BY timestamp DESC
+            ''')
+        
+        reports = cursor.fetchall()
+        
+        # Преобразуем результы в список словарей
+        result = []
+        for report in reports:
+            result.append({
+                'id': report['id'],
+                'city': report['city'],
+                'text': report['text'],
+                'temp': report['temp'],
+                'timestamp': report['timestamp']
+            })
+
+        # Если данных нет, возвращаем ошибку
+        if not result:
+            return jsonify({'message': 'No reports found'}), 404
+        
+        # Возвращаем результаты
+        return jsonify(result), 200
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    
 
 # Запускаем приложение
 if __name__ == '__main__':
