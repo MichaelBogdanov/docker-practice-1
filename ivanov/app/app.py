@@ -49,7 +49,54 @@ def before_request():
     init_db()
 
 # Маршрутизация
-# TODO
+# Добавление отчёта о погоде
+@app.route('/reports', methods=['POST'])
+def create_report():
+    try:
+        data = request.get_json()
+        
+        # Проверка обязательных полей
+        if not data:
+            return jsonify({'error': 'No data provided'}), 400
+        
+        if not 'city' in data:
+            return jsonify({'error': 'City is required'}), 400
+
+        if not 'text' in data:
+            return jsonify({'error': 'Text is required'}), 400
+
+        if not 'temp' in data:
+            return jsonify({'error': 'Temperature is required'}), 400
+        
+
+        # Получение данных
+        city = data['city']
+        text = data['text']
+        temp = data['temp']
+        
+        db = get_db()
+        cursor = db.cursor()
+        
+        # SQL запрос для вставки данных
+        cursor.execute('''
+            INSERT INTO reports (city, text, temp, timestamp)
+            VALUES (?, ?, ?, datetime('now'))
+        ''', (city, text, temp))
+        
+        db.commit()
+        
+        # Возвращаем ответ
+        return jsonify({
+            'id': cursor.lastrowid,
+            'city': city,
+            'text': text,
+            'temp': temp,
+            'message': 'Report created successfully'
+        }), 201
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 
 # Запускаем приложение
 if __name__ == '__main__':
