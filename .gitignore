@@ -8,3 +8,6 @@ __pycache__/
 
 # Системные файлы Visual Studio
 .vscode/
+
+# Файлы базы данных
+*.db
