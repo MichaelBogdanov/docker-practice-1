@@ -1,7 +1,5 @@
 from flask import Flask, request, jsonify, g
 import sqlite3
-import json
-from datetime import datetime
 
 # ==== Конфигурация ==== #
 DEBUG = True
