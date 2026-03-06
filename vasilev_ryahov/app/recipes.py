@@ -2,24 +2,24 @@ import random
 
 import asyncpg
 
+
 async def create_recipe(
-    conn: asyncpg.Connection, 
-    title: str,
-    steps: str,
-    ingredients: list[str]
+    conn: asyncpg.Connection, title: str, steps: str, ingredients: list[str]
 ) -> int:
     """Создание рецепта (и добавление ингредиентов, которых не существует в таблице)"""
     async with conn.transaction():
         recipe_id = await conn.fetchval(
             "INSERT INTO recipe (title, steps) VALUES ($1, $2) RETURNING recipe_id",
-            title, steps
+            title,
+            steps,
         )
-        
+
         unique_ingredients = list(set(ingredients))
-        
+
         ingredient_ids = [
-            row["ingredient_id"] 
-            for row in await conn.fetch("""
+            row["ingredient_id"]
+            for row in await conn.fetch(
+                """
                 WITH new_ingredients AS (
                     INSERT INTO ingredient (name)
                     SELECT * FROM UNNEST($1::TEXT[])
@@ -28,31 +28,35 @@ async def create_recipe(
                 )
                 SELECT ingredient_id FROM new_ingredients
                 UNION
-                SELECT ingredient_id FROM ingredient 
+                SELECT ingredient_id FROM ingredient
                 WHERE name = ANY($1)
-            """, unique_ingredients)
+            """,
+                unique_ingredients,
+            )
         ]
-        
-        await conn.executemany("""
+
+        await conn.executemany(
+            """
             INSERT INTO recipe_ingredient (recipe_id, ingredient_id)
             VALUES ($1, $2)
-        """, [(recipe_id, ing_id) for ing_id in ingredient_ids])
-        
+        """,
+            [(recipe_id, ing_id) for ing_id in ingredient_ids],
+        )
+
         return recipe_id
 
+
 async def get_recipes(
-    conn: asyncpg.Connection,
-    ingredients: list[str] | None = None,
-    match: str = "all"
+    conn: asyncpg.Connection, ingredients: list[str] | None = None, match: str = "all"
 ) -> list[dict]:
-    """ 
+    """
     Получение рецептов с фильтрацией по ингредиентам.
 
     match:
     - any: хотя бы один из списка
     - all: все из списка (можно больше)
     """
-    
+
     if not ingredients:
         rows = await conn.fetch("""
             SELECT
@@ -67,7 +71,8 @@ async def get_recipes(
             ORDER BY r.recipe_id
         """)
     elif ingredients and match == "any":
-        rows = await conn.fetch("""
+        rows = await conn.fetch(
+            """
             SELECT
                 r.recipe_id,
                 r.title,
@@ -79,9 +84,12 @@ async def get_recipes(
             WHERE i.name = ANY($1::text[])
             GROUP BY r.recipe_id, r.title, r.steps
             ORDER BY r.recipe_id
-        """, ingredients)
+        """,
+            ingredients,
+        )
     else:
-        rows = await conn.fetch("""
+        rows = await conn.fetch(
+            """
         SELECT
             r.recipe_id,
             r.title,
@@ -101,7 +109,10 @@ async def get_recipes(
         )
         GROUP BY r.recipe_id, r.title, r.steps
         ORDER BY r.recipe_id
-        """, ingredients, len(ingredients))
+        """,
+            ingredients,
+            len(ingredients),
+        )
 
     return [
         {
@@ -113,18 +124,19 @@ async def get_recipes(
         for row in rows
     ]
 
+
 async def get_random_recipe(
-    conn: asyncpg.Connection,
-    ingredients: list[str] | None = None,
-    match: str = "all"
+    conn: asyncpg.Connection, ingredients: list[str] | None = None, match: str = "all"
 ) -> dict:
     """Случайный рецепт"""
     recipes = await get_recipes(conn, ingredients, match)
     return random.choice(recipes) if recipes else None
 
+
 async def get_recipe_by_id(conn: asyncpg.Connection, recipe_id: int) -> dict | None:
     """Рецепт по ID"""
-    row = await conn.fetchrow("""
+    row = await conn.fetchrow(
+        """
         SELECT
             r.recipe_id,
             r.title,
@@ -135,7 +147,9 @@ async def get_recipe_by_id(conn: asyncpg.Connection, recipe_id: int) -> dict | N
         LEFT JOIN ingredient i ON ri.ingredient_id = i.ingredient_id
         WHERE r.recipe_id = $1
         GROUP BY r.recipe_id, r.title, r.steps
-    """, recipe_id)
+    """,
+        recipe_id,
+    )
 
     if row:
         return {
