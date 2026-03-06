@@ -1,0 +1,28 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+    - id: trailing-whitespace
+      files: ^vasilev_ryahov/app/
+      types: [python]
+    - id: end-of-file-fixer
+      files: ^vasilev_ryahov/app/
+      types: [python]
+    - id: check-added-large-files
+      files: ^vasilev_ryahov/app/
+      args: [--maxkb=1024]
+    - id: mixed-line-ending
+      files: ^vasilev_ryahov/app/
+      types: [python]
+      args: [--fix=lf]
+  
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.11.0
+    hooks:
+    - id: ruff-format
+      files: ^vasilev_ryahov/app/
+      types: [python]
+    - id: ruff
+      files: ^vasilev_ryahov/app/
+      types: [python]
+      args: [--fix, --exit-non-zero-on-fix]
