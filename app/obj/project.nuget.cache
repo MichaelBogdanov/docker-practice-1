@@ -1,0 +1,15 @@
+{
+  "version": 2,
+  "dgSpecHash": "Jd8YkMVjl+5r21rRZjZRYuTHc+5P59NuGdsEEl70R2sYpc8UDMOnTRE888jzZ7bJWoat9lVdStgRlMnKzOgoOw==",
+  "success": true,
+  "projectFilePath": "C:\\Users\\potap\\Source\\Repos\\HeKuToCuK\\potapov_matveev_kruchkov\\app\\YourProject.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\potap\\.nuget\\packages\\microsoft.extensions.apidescription.server\\6.0.5\\microsoft.extensions.apidescription.server.6.0.5.nupkg.sha512",
+    "C:\\Users\\potap\\.nuget\\packages\\microsoft.openapi\\1.2.3\\microsoft.openapi.1.2.3.nupkg.sha512",
+    "C:\\Users\\potap\\.nuget\\packages\\swashbuckle.aspnetcore\\6.5.0\\swashbuckle.aspnetcore.6.5.0.nupkg.sha512",
+    "C:\\Users\\potap\\.nuget\\packages\\swashbuckle.aspnetcore.swagger\\6.5.0\\swashbuckle.aspnetcore.swagger.6.5.0.nupkg.sha512",
+    "C:\\Users\\potap\\.nuget\\packages\\swashbuckle.aspnetcore.swaggergen\\6.5.0\\swashbuckle.aspnetcore.swaggergen.6.5.0.nupkg.sha512",
+    "C:\\Users\\potap\\.nuget\\packages\\swashbuckle.aspnetcore.swaggerui\\6.5.0\\swashbuckle.aspnetcore.swaggerui.6.5.0.nupkg.sha512"
+  ],
+  "logs": []
+}
