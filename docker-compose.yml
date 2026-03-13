@@ -1,0 +1,10 @@
+services:
+  todo-api:
+    build: ./app
+    container_name: todo-api
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./app/data:/app/data
+    environment:
+      - DB_PATH=/app/data/tasks.db
