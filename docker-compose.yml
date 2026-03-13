@@ -1,0 +1,9 @@
+services:
+  api:
+    build:
+      context: ./app 
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    restart: unless-stopped
+    container_name: image-metadata-api
