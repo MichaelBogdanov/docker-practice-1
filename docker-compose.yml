@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  api:
+    build: ./app
+    container_name: image-metadata-api
+    ports:
+      - "5000:5000"
+    volumes:
+      #volume для сохранения бд
+      - image-data:/data
+    restart: unless-stopped
+    networks:
+      - app-network
+
+volumes:
+  image-data:
+    name: image-metadata-data
+
+networks:
+  app-network:
+    name: image-metadata-network
