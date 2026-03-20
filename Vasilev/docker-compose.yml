@@ -1,0 +1,11 @@
+services:
+  jokes-api:
+    build:
+      context: .
+      dockerfile: app/Dockerfile
+    container_name: jokes-api
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./app/data:/app/data
+    restart: unless-stopped
