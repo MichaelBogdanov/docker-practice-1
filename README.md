@@ -16,10 +16,9 @@
 ## Структура проекта
 
 ```text
-malyshev/
-  app/
-    app.py
-    requirements.txt
-    Dockerfile
-  README.md
-  docker-compose.yml
+app/
+  app.py
+  requirements.txt
+  Dockerfile
+README.md
+docker-compose.yml
