@@ -1,0 +1,6 @@
+services:
+  app:
+    build: ./app
+    container_name: scoreboard_api
+    ports:
+      - "5000:5000"
