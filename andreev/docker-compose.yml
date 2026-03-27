@@ -1,0 +1,10 @@
+services:
+  images-api:
+    build: ./app
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./app:/app
+    environment:
+      - FLASK_ENV=development
+      - FLASK_DEBUG=1
