@@ -1,0 +1,9 @@
+version: '3.9'
+
+services:
+  app:
+    build: ./src
+    container_name: weather_api
+    ports:
+      - "5000:5000"
+    restart: unless-stopped
