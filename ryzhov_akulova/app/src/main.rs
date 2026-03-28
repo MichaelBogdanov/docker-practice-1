@@ -16,7 +16,7 @@ struct QueryInclude {
     include: String,
 }
 
-struct Repsponse {
+struct Response {
     status: String,
     message: String,
 }
