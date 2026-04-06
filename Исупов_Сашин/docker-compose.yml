@@ -1,0 +1,11 @@
+﻿name: isupov_sashin
+
+services:
+  jokes-api:
+    build: ./app
+    container_name: jokes-api-csharp
+    ports:
+      - "5000:5000"
+    environment:
+      - ASPNETCORE_URLS=http://+:5000
+      - ASPNETCORE_ENVIRONMENT=Development

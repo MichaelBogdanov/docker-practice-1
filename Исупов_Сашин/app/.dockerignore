@@ -1,0 +1,12 @@
+﻿**/AppData/**
+**/ElevatedDiagnostics**
+**/LogFiles**
+**/RtBackup
+.git
+.vs
+bin/
+obj/
+*.md
+*.log
+.DS_Store
+Thumbs.db
