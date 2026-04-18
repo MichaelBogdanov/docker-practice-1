@@ -1,11 +1,16 @@
 #![allow(dead_code)]
 
+// use std::sync::Arc;
+// use tokio::sync::Mutex;
+
 use axum::{
     routing::{get, post},
     http::StatusCode,
     Json,
     Router,
+    extract::State,
 };
+
 use serde::{Serialize, Deserialize};
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -15,9 +20,14 @@ struct Recipe {
     steps: String,
 }
 
+// #[derive(Clone)]
+// struct AppState {
+//     recipes: Arc<Mutex<Vec<Recipe>>>,
+// }
+
 #[derive(Clone)]
 struct AppState {
-    recipes: Vec<Recipe>,
+    recipes: Vec<Recipe>
 }
 
 #[derive(Deserialize)]
@@ -38,10 +48,14 @@ struct Response {
 
 #[tokio::main]
 async fn main() {
+    // let shared_state = AppState { recipes: Arc::new(Mutex::new(vec![])) };
+    let shared_state = AppState { recipes: vec![] };
+
     let app = Router::new()
         .route("/", get(root))
         .route("/recipes", get(get_recipes).post(post_recipe))
-        .route("/recipes/random", get(random_recipe));
+        .route("/recipes/random", get(random_recipe))
+        .with_state(shared_state);
 
     let listener = tokio::net::TcpListener::bind("127.0.0.1:3000")
         .await
@@ -55,15 +69,19 @@ async fn root() -> &'static str {
     "Hello, from axum"
 }
 
-async fn get_recipes() -> &'static str {
-    "Hello from get_recipes func"
+async fn get_recipes(State(state): State<AppState>) -> String {
+    format!("{:?}", state.recipes)
 }
 
 async fn random_recipe() -> &'static str {
     "Hello from random_recipe func"
 }
 
-async fn post_recipe(Json(recipe): Json<Recipe>) -> (StatusCode, Json<Recipe>) {
+async fn post_recipe(
+    State(mut state): State<AppState>,
+    Json(recipe): Json<Recipe>
+) -> StatusCode {
     println!("{:?}", recipe);
-    (StatusCode::CREATED, Json(Recipe { title: recipe.title, ingredients: recipe.ingredients, steps: recipe.steps }))
+    state.recipes.push(Recipe{ title: recipe.title, ingredients: recipe.ingredients, steps: recipe.steps });
+    StatusCode::CREATED
 }
