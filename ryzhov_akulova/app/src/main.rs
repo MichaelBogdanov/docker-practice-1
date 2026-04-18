@@ -63,7 +63,7 @@ async fn random_recipe() -> &'static str {
     "Hello from random_recipe func"
 }
 
-async fn post_recipe(Json(payload): Json<Response>) -> (StatusCode, Json<Recipe>) {
-    (StatusCode::CREATED, Json(Recipe { title: String::from("test"), ingredients: vec![String::from("1")], steps: String::from("test") }))
-
+async fn post_recipe(Json(recipe): Json<Recipe>) -> (StatusCode, Json<Recipe>) {
+    println!("{:?}", recipe);
+    (StatusCode::CREATED, Json(Recipe { title: recipe.title, ingredients: recipe.ingredients, steps: recipe.steps }))
 }
