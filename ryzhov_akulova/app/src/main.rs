@@ -1,5 +1,11 @@
 #![allow(dead_code)]
 
+use axum::{
+    routing::{get, post},
+    http::StatusCode,
+    Json,
+    Router,
+};
 use serde::{Serialize, Deserialize};
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -13,7 +19,6 @@ struct Recipe {
 struct AppState {
     recipes: Vec<Recipe>,
 }
-
 
 #[derive(Deserialize)]
 struct QueryHas {
@@ -31,21 +36,34 @@ struct Response {
     message: String,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
-struct Foo {
-    message: String,
+#[tokio::main]
+async fn main() {
+    let app = Router::new()
+        .route("/", get(root))
+        .route("/recipes", get(get_recipes).post(post_recipe))
+        .route("/recipes/random", get(random_recipe));
+
+    let listener = tokio::net::TcpListener::bind("127.0.0.1:3000")
+        .await
+        .unwrap();
+    println!("Server running on http://localhost:3000");
+
+    axum::serve(listener, app).await.unwrap();
 }
 
-fn main() {
-    println!("Hello, world!");
+async fn root() -> &'static str {
+    "Hello, from axum"
+}
 
-    let struct1 = Foo { message: String::from("hello from foo") }; 
+async fn get_recipes() -> &'static str {
+    "Hello from get_recipes func"
+}
 
-    let serialized = serde_json::to_string(&struct1).unwrap();
+async fn random_recipe() -> &'static str {
+    "Hello from random_recipe func"
+}
 
-    println!("{}", serialized);
+async fn post_recipe(Json(payload): Json<Response>) -> (StatusCode, Json<Recipe>) {
+    (StatusCode::CREATED, Json(Recipe { title: String::from("test"), ingredients: vec![String::from("1")], steps: String::from("test") }))
 
-    let deserialized: Foo = serde_json::from_str(&serialized).unwrap();
-
-    println!("{:?}", deserialized);
 }
