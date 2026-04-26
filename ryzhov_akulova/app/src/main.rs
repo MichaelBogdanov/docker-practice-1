@@ -1,7 +1,6 @@
 #![allow(dead_code)]
 
-// use std::sync::Arc;
-// use tokio::sync::Mutex;
+use std::sync::{Arc, Mutex};
 
 use axum::{
     routing::{get, post},
@@ -20,14 +19,9 @@ struct Recipe {
     steps: String,
 }
 
-// #[derive(Clone)]
-// struct AppState {
-//     recipes: Arc<Mutex<Vec<Recipe>>>,
-// }
-
 #[derive(Clone)]
 struct AppState {
-    recipes: Vec<Recipe>
+    recipes: Arc<Mutex<Vec<Recipe>>>,
 }
 
 #[derive(Deserialize)]
@@ -49,7 +43,7 @@ struct Response {
 #[tokio::main]
 async fn main() {
     // let shared_state = AppState { recipes: Arc::new(Mutex::new(vec![])) };
-    let shared_state = AppState { recipes: vec![] };
+    let shared_state = AppState { recipes: Arc::new(Mutex::new(vec![])) };
 
     let app = Router::new()
         .route("/", get(root))
@@ -70,7 +64,8 @@ async fn root() -> &'static str {
 }
 
 async fn get_recipes(State(state): State<AppState>) -> String {
-    format!("{:?}", state.recipes)
+    let recipes = state.recipes.lock().unwrap();
+    format!("{:?}", recipes)
 }
 
 async fn random_recipe() -> &'static str {
@@ -78,10 +73,12 @@ async fn random_recipe() -> &'static str {
 }
 
 async fn post_recipe(
-    State(mut state): State<AppState>,
+    State(state): State<AppState>,
     Json(recipe): Json<Recipe>
 ) -> StatusCode {
     println!("{:?}", recipe);
-    state.recipes.push(Recipe{ title: recipe.title, ingredients: recipe.ingredients, steps: recipe.steps });
+    let mut recipes = state.recipes.lock().unwrap();
+    recipes.push(recipe);
+
     StatusCode::CREATED
 }
