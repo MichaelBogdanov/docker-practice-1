@@ -42,7 +42,6 @@ struct Response {
 
 #[tokio::main]
 async fn main() {
-    // let shared_state = AppState { recipes: Arc::new(Mutex::new(vec![])) };
     let shared_state = AppState { recipes: Arc::new(Mutex::new(vec![])) };
 
     let app = Router::new()
@@ -63,9 +62,11 @@ async fn root() -> &'static str {
     "Hello, from axum"
 }
 
-async fn get_recipes(State(state): State<AppState>) -> String {
-    let recipes = state.recipes.lock().unwrap();
-    format!("{:?}", recipes)
+async fn get_recipes(
+    State(state): State<AppState>
+) -> Json<Vec<Recipe>> {
+    let recipes = state.recipes.lock().unwrap().clone();
+    Json(recipes)
 }
 
 async fn random_recipe() -> &'static str {
