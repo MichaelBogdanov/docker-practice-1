@@ -1,9 +1,9 @@
 #![allow(dead_code)]
 
-use std::{iter::Filter, sync::{Arc, Mutex}};
+use std::{sync::{Arc, Mutex}};
 
 use axum::{
-    routing::{get, post},
+    routing::get,
     http::StatusCode,
     Json,
     Router,
@@ -11,6 +11,8 @@ use axum::{
 };
 
 use serde::{Serialize, Deserialize};
+
+use rand::{prelude::*, random};
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 struct Recipe {
@@ -69,7 +71,8 @@ async fn get_recipes(
     let recipes = state.recipes.lock().unwrap().clone();
     if let Some(has) = query.has {
         let has_ingredients: Vec<String> = has.split(',').map(|item| item.trim().to_lowercase()).collect();
-        let foo: Vec<Recipe> = 
+        
+        let filtered_recipes: Vec<Recipe> = 
             recipes
             .iter()
             .filter(|recipe| {
@@ -79,13 +82,26 @@ async fn get_recipes(
             }).cloned().collect();
 
         println!("{:?}", has_ingredients);
-        Json(foo)
+
+        Json(filtered_recipes)
     } else {
         Json(recipes)
     }
 }
 
-async fn random_recipe() -> &'static str {
+async fn random_recipe(
+    State(state): State<AppState>,
+) -> &'static str {
+    let recipes = state.recipes.lock().unwrap().clone();
+    
+    if recipes.len() == 0 {
+        return "fuk"
+    } else {
+        let number_of_recipes = recipes.len();
+        let mut rng = rand::rng();
+        let random_number: u32 = rng.random();
+        println!("{}", random_number);
+    }
     "Hello from random_recipe func"
 }
 
