@@ -1,13 +1,13 @@
 #![allow(dead_code)]
 
-use std::sync::{Arc, Mutex};
+use std::{iter::Filter, sync::{Arc, Mutex}};
 
 use axum::{
     routing::{get, post},
     http::StatusCode,
     Json,
     Router,
-    extract::State,
+    extract::{State, Query},
 };
 
 use serde::{Serialize, Deserialize};
@@ -63,10 +63,26 @@ async fn root() -> &'static str {
 }
 
 async fn get_recipes(
-    State(state): State<AppState>
+    State(state): State<AppState>,
+    Query(query): Query<QueryHas>
 ) -> Json<Vec<Recipe>> {
     let recipes = state.recipes.lock().unwrap().clone();
-    Json(recipes)
+    if let Some(has) = query.has {
+        let has_ingredients: Vec<String> = has.split(',').map(|item| item.trim().to_lowercase()).collect();
+        let foo: Vec<Recipe> = 
+            recipes
+            .iter()
+            .filter(|recipe| {
+                has_ingredients.iter().all(|wanted| {
+                    recipe.ingredients.contains(wanted)
+                })
+            }).cloned().collect();
+
+        println!("{:?}", has_ingredients);
+        Json(foo)
+    } else {
+        Json(recipes)
+    }
 }
 
 async fn random_recipe() -> &'static str {
