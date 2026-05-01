@@ -12,9 +12,9 @@ use axum::{
 
 use serde::{Serialize, Deserialize};
 
-use rand::{prelude::*, random};
+use rand::{prelude::*};
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, Default)]
 struct Recipe {
     title: String,
     ingredients: Vec<String>,
@@ -37,8 +37,7 @@ struct QueryInclude {
 }
 
 #[derive(Serialize, Deserialize)]
-struct Response {
-    status: String,
+struct ErrorResponse {
     message: String,
 }
 
@@ -81,8 +80,6 @@ async fn get_recipes(
                 })
             }).cloned().collect();
 
-        println!("{:?}", has_ingredients);
-
         Json(filtered_recipes)
     } else {
         Json(recipes)
@@ -91,27 +88,42 @@ async fn get_recipes(
 
 async fn random_recipe(
     State(state): State<AppState>,
-) -> &'static str {
+) -> Result<Json<Recipe>, (StatusCode, Json<ErrorResponse>)> {
     let recipes = state.recipes.lock().unwrap().clone();
+    let mut rng = rand::rng();
     
-    if recipes.len() == 0 {
-        return "fuk"
-    } else {
-        let number_of_recipes = recipes.len();
-        let mut rng = rand::rng();
-        let random_number: u32 = rng.random();
-        println!("{}", random_number);
+    if recipes.is_empty() {
+        return Err((
+            StatusCode::BAD_REQUEST, 
+            Json(ErrorResponse { 
+                message: String::from("An empty list"),
+            }),
+        ));
     }
-    "Hello from random_recipe func"
+
+    let number_of_recipes = recipes.len();
+    let index: u32 = rng.random::<u32>() % number_of_recipes as u32;
+    
+    if let Some(recipe ) = recipes.get(index as usize).cloned() {
+        Ok(Json(recipe))
+    } else { 
+        return Err((
+            StatusCode::NOT_FOUND, 
+            Json(ErrorResponse { 
+                message: String::from("An empty list"),
+            }),
+        ));
+    }
+    
 }
 
 async fn post_recipe(
     State(state): State<AppState>,
     Json(recipe): Json<Recipe>
-) -> StatusCode {
+) -> Result<StatusCode, (StatusCode, Json<ErrorResponse>)> {
     println!("{:?}", recipe);
     let mut recipes = state.recipes.lock().unwrap();
     recipes.push(recipe);
 
-    StatusCode::CREATED
+    Ok(StatusCode::CREATED)
 }
