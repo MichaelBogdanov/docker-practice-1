@@ -33,7 +33,7 @@ struct QueryHas {
 
 #[derive(Deserialize)]
 struct QueryInclude {
-    include: String,
+    include: Option<String>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -60,7 +60,7 @@ async fn main() {
 }
 
 async fn root() -> &'static str {
-    "Hello, from axum"
+    "Hello from axum"
 }
 
 async fn get_recipes(
@@ -88,25 +88,11 @@ async fn get_recipes(
 
 async fn random_recipe(
     State(state): State<AppState>,
+    Query(query): Query<QueryInclude>,
 ) -> Result<Json<Recipe>, (StatusCode, Json<ErrorResponse>)> {
     let recipes = state.recipes.lock().unwrap().clone();
-    let mut rng = rand::rng();
     
     if recipes.is_empty() {
-        return Err((
-            StatusCode::BAD_REQUEST, 
-            Json(ErrorResponse { 
-                message: String::from("An empty list"),
-            }),
-        ));
-    }
-
-    let number_of_recipes = recipes.len();
-    let index: u32 = rng.random::<u32>() % number_of_recipes as u32;
-    
-    if let Some(recipe ) = recipes.get(index as usize).cloned() {
-        Ok(Json(recipe))
-    } else { 
         return Err((
             StatusCode::NOT_FOUND, 
             Json(ErrorResponse { 
@@ -115,15 +101,57 @@ async fn random_recipe(
         ));
     }
     
+    let candidate_recipes: Vec<Recipe> = match query.include {
+        Some(include) => {
+            let include_ingredients: Vec<String> = include.split(',').map(|item| item.trim().to_lowercase()).collect();
+            let filtered_recipes: Vec<Recipe> = 
+            recipes
+                .iter()
+                .filter(|recipe| {
+                    include_ingredients.iter().all(|wanted| {
+                        recipe.ingredients.contains(wanted)
+                    }) 
+                }).cloned().collect();
+                
+            filtered_recipes
+        },
+        None => {
+            recipes
+        }
+    };
+
+    if candidate_recipes.is_empty() {
+        return Err((
+            StatusCode::NOT_FOUND,
+            Json(ErrorResponse { 
+                message: "An empty list after filter".to_string() 
+            })
+        ))
+    }
+    
+    let number_of_recipes = candidate_recipes.len();
+    let mut rng = rand::rng();
+    let index: u32 = rng.random::<u32>() % number_of_recipes as u32;
+    
+    if let Some(recipe ) = candidate_recipes.get(index as usize).cloned() {
+        Ok(Json(recipe))
+    } else { 
+        return Err((
+            StatusCode::NOT_FOUND, 
+            Json(ErrorResponse { 
+                message: "An empty list".to_string(),
+            }),
+        ));
+    }
 }
+
 
 async fn post_recipe(
     State(state): State<AppState>,
     Json(recipe): Json<Recipe>
-) -> Result<StatusCode, (StatusCode, Json<ErrorResponse>)> {
-    println!("{:?}", recipe);
+) -> StatusCode {
     let mut recipes = state.recipes.lock().unwrap();
     recipes.push(recipe);
 
-    Ok(StatusCode::CREATED)
+    StatusCode::CREATED
 }
