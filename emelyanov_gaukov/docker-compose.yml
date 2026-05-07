@@ -1,0 +1,17 @@
+services:
+  url-shortener:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    container_name: url_shortener
+    ports:
+      - "5000:5000"
+    volumes:
+      - url_data:/data
+    environment:
+      - DATA_FILE=/data/links.json
+    restart: unless-stopped
+
+volumes:
+  url_data:
+    driver: local
