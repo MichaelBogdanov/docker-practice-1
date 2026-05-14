@@ -3,7 +3,7 @@ import random
 
 app = Flask(__name__)
 
-# Хранилище цитат в памяти
+
 quotes = [
     {
         "id": 1,
