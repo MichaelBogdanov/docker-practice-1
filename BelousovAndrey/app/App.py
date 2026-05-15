@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify
 import random
 
 app = Flask(__name__)
-recipes = []
+recipes = [] #локально, потому-что без БД
 next_id = 1
 
 @app.route('/recipes', methods=['GET'])
