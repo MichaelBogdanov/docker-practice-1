@@ -48,5 +48,11 @@ def add_quote():
     next_id += 1
     return jsonify(new_quote), 201
 
+@app.route('/quotes/<int:quote_id>', methods=['DELETE'])
+def delete_quote(quote_id):
+    global quotes
+    quotes = [q for q in quotes if q["id"] != quote_id]
+    return '', 204
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
