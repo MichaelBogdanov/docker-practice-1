@@ -1,3 +1,4 @@
+import random
 from flask import Flask, request, jsonify
 
 app = Flask(__name__)
@@ -9,7 +10,29 @@ next_id = 2
 
 @app.route('/quotes', methods=['GET'])
 def get_quotes():
-    return jsonify(quotes)
+    tag = request.args.get('tag')
+    limit = request.args.get('limit', type=int)
+
+    result = quotes
+    if tag:
+        result = [q for q in result if tag in q.get('tags', [])]
+    if limit:
+        result = result[:limit]
+
+    return jsonify(result)
+
+@app.route('/quotes/random', methods=['GET'])
+def get_random_quote():
+    tag = request.args.get('tag')
+
+    result = quotes
+    if tag:
+        result = [q for q in result if tag in q.get('tags', [])]
+
+    if not result:
+        return jsonify({"error": "Цитаты не найдены"}), 404
+
+    return jsonify(random.choice(result))
 
 @app.route('/quotes', methods=['POST'])
 def add_quote():
